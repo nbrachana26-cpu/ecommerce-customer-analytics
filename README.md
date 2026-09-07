@@ -62,16 +62,28 @@ Open it directly in any browser — no server needed.
 
 ## 4. Key findings
 
+![Monthly Revenue Trend](visuals/01_monthly_revenue.png)
+
 - **Revenue is concentrated**: Furniture is 63% of revenue from just 32% of units sold —
   it's a high-price, lower-volume category and the one worth protecting on margin.
 - **December drives outsized revenue** (~2x a normal month) via a holiday ordering spike —
   useful for inventory and staffing planning.
+
+![Revenue by Category](visuals/02_category_revenue.png)
+
 - **87% repeat purchase rate** overall, but customer value is highly uneven: "Champions"
   (30% of customers) average **$3,254** lifetime value vs. **$307** for "At Risk" customers.
+
+![Customer Segments (RFM)](visuals/03_rfm_segments.png)
+
 - **30% of customers are churned** under a 120-day inactivity definition.
 - The churn model reaches **ROC-AUC 0.81** using only frequency, monetary value, average
   order value, and tenure — no need for complex features to get a usable early-warning signal.
   Recency-adjacent features (low frequency, low monetary value) are the strongest churn drivers.
+
+![Churn Model Feature Importance](visuals/04_churn_feature_importance.png)
+![Confusion Matrix](visuals/05_confusion_matrix.png)
+![Cohort Retention](visuals/06_cohort_retention.png)
 
 ## 5. Recommendations
 
