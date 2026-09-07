@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ledgerline — E-commerce Performance Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #132A2C;
+    --panel: #1B3B3C;
+    --panel-hi: #214545;
+    --text: #F1EDE3;
+    --text-muted: #9FB3AF;
+    --accent: #C98A3C;
+    --accent-soft: #E3B876;
+    --sage: #6FA98C;
+    --danger: #C2704A;
+    --line: rgba(241,237,227,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 40px 48px 64px;
+    line-height: 1.5;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  h1{
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 0.2px;
+  }
+  header p{
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 6px;
+    max-width: 480px;
+  }
+  .range{
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+  .range strong{ color: var(--accent-soft); font-weight: 600; }
+
+  .kpis{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi{
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+  }
+  .kpi .label{ font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .kpi .value{ font-family: 'Lora', serif; font-size: 25px; font-weight: 600; }
+  .kpi .value.accent{ color: var(--accent-soft); }
+  .kpi .value.danger{ color: var(--danger); }
+
+  .grid2{
+    display:grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .panel{
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 22px 24px;
+    border: 1px solid var(--line);
+  }
+  .panel h2{
+    font-family:'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .panel .sub{
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .chart-box{ position: relative; height: 280px; }
+  .chart-box.tall{ height: 320px; }
+
+  .seg-legend{
+    display:flex; flex-direction:column; gap:10px; margin-top: 14px;
+  }
+  .seg-row{ display:flex; justify-content:space-between; font-size: 13px; }
+  .seg-row .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; }
+  .seg-row .name{ color: var(--text); }
+  .seg-row .val{ color: var(--text-muted); }
+
+  footer{
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+
+  @media (max-width: 900px){
+    .kpis{ grid-template-columns: repeat(2, 1fr); }
+    .grid2{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Ledgerline — E-commerce Performance</h1>
+      <p>Revenue, retention and churn-risk overview across the customer base and product catalog.</p>
+    </div>
+    <div class="range">Reporting window<br><strong>Jan 2023 – Dec 2024</strong></div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Monthly revenue</h2>
+      <div class="sub">Includes seasonal holiday lift each December</div>
+      <div class="chart-box tall"><canvas id="revenueChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Customer segments (RFM)</h2>
+      <div class="sub">Recency · Frequency · Monetary scoring</div>
+      <div class="chart-box"><canvas id="segmentChart"></canvas></div>
+      <div class="seg-legend" id="segLegend"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Revenue by category</h2>
+      <div class="sub">Furniture drives the majority of revenue despite fewer units sold</div>
+      <div class="chart-box"><canvas id="categoryChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Orders vs. active customers</h2>
+      <div class="sub">Order count tracks customer activity closely — no major basket-size shift</div>
+      <div class="chart-box"><canvas id="ordersChart"></canvas></div>
+    </div>
+  </div>
+
+  <footer>
+    Built on a synthetic 1,000-customer / 6,600-order dataset generated for portfolio purposes. Methodology: RFM segmentation, cohort retention, and a logistic regression churn model (ROC-AUC 0.81) — see README and notebooks/analysis.py for full details.
+  </footer>
+
+</div>
+
+<script>
+const DATA = {"monthly": {"month": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12"], "revenue": [30574.94, 27041.42, 29585.61, 33223.76, 34330.22, 35134.74, 43551.63, 46622.44, 39780.2, 58781.94, 60481.56, 118866.46, 65507.26, 59400.88, 70685.84, 57914.06, 54462.77, 49620.12, 58333.67, 65180.57, 52737.55, 64164.18, 52858.26, 128007.1], "orders": [141, 133, 142, 161, 177, 200, 213, 230, 218, 299, 255, 605, 334, 289, 314, 289, 279, 259, 309, 319, 269, 298, 263, 604], "active_customers": [109, 108, 105, 128, 140, 164, 177, 182, 178, 225, 199, 372, 242, 214, 224, 222, 215, 204, 236, 237, 217, 238, 204, 377]}, "category": {"category": ["Furniture", "Electronics", "Apparel", "Office Supplies"], "revenue": [843586.93, 280535.63, 144975.17, 67749.45], "units": [3979, 4624, 3928, 4819]}, "segments": {"Champions": 262, "At Risk": 243, "Loyal Customers": 184, "Potential Loyalists": 161, "Needs Attention": 14}, "segment_monetary": {"At Risk": 307.43, "Champions": 3254.22, "Loyal Customers": 1432.17, "Needs Attention": 153.96, "Potential Loyalists": 893.56}, "kpis": {"total_revenue": 1336847.18, "total_customers": 864, "churn_rate": 30.1, "avg_order_value": 200.9, "repeat_rate": 87.27}};
+
+const ink = '#F1EDE3';
+const muted = '#9FB3AF';
+const gridColor = 'rgba(241,237,227,0.08)';
+Chart.defaults.color = muted;
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+
+// KPI cards
+const kpiHtml = `
+  <div class="kpi"><div class="label">Total revenue</div><div class="value accent">$${(DATA.kpis.total_revenue/1000).toFixed(0)}K</div></div>
+  <div class="kpi"><div class="label">Customers</div><div class="value">${DATA.kpis.total_customers.toLocaleString()}</div></div>
+  <div class="kpi"><div class="label">Avg order value</div><div class="value">$${DATA.kpis.avg_order_value.toFixed(0)}</div></div>
+  <div class="kpi"><div class="label">Repeat purchase rate</div><div class="value" style="color:var(--sage)">${DATA.kpis.repeat_rate.toFixed(0)}%</div></div>
+  <div class="kpi"><div class="label">Churn rate (120d)</div><div class="value danger">${DATA.kpis.churn_rate}%</div></div>
+`;
+document.getElementById('kpis').innerHTML = kpiHtml;
+
+// Revenue line chart
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: {
+    labels: DATA.monthly.month,
+    datasets: [{
+      label: 'Revenue ($)',
+      data: DATA.monthly.revenue,
+      borderColor: '#C98A3C',
+      backgroundColor: 'rgba(201,138,60,0.12)',
+      fill: true,
+      tension: 0.35,
+      pointRadius: 2,
+      pointBackgroundColor: '#E3B876',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ maxRotation:60, minRotation:60, font:{size:10} } },
+      y:{ grid:{ color: gridColor }, ticks:{ callback: v => '$'+(v/1000)+'K' } }
+    }
+  }
+});
+
+// Segment donut
+const segColors = { 'Champions':'#C98A3C', 'Loyal Customers':'#6FA98C', 'Potential Loyalists':'#7FA9C9', 'At Risk':'#C2704A', 'Needs Attention':'#6b5b73' };
+const segLabels = Object.keys(DATA.segments);
+new Chart(document.getElementById('segmentChart'), {
+  type: 'doughnut',
+  data: {
+    labels: segLabels,
+    datasets: [{
+      data: segLabels.map(k => DATA.segments[k]),
+      backgroundColor: segLabels.map(k => segColors[k]),
+      borderColor: '#1B3B3C',
+      borderWidth: 3
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false } },
+    cutout: '62%'
+  }
+});
+document.getElementById('segLegend').innerHTML = segLabels.map(k => `
+  <div class="seg-row">
+    <span><span class="dot" style="background:${segColors[k]}"></span><span class="name">${k}</span></span>
+    <span class="val">${DATA.segments[k]} cust · avg $${DATA.segment_monetary[k].toFixed(0)}</span>
+  </div>
+`).join('');
+
+// Category bar
+new Chart(document.getElementById('categoryChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.category.category,
+    datasets: [{
+      label: 'Revenue',
+      data: DATA.category.revenue,
+      backgroundColor: '#6FA98C',
+      borderRadius: 4,
+      maxBarThickness: 46
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{
+      x:{ grid:{ color:gridColor }, ticks:{ callback: v => '$'+(v/1000)+'K' } },
+      y:{ grid:{ display:false } }
+    }
+  }
+});
+
+// Orders vs customers
+new Chart(document.getElementById('ordersChart'), {
+  type: 'line',
+  data: {
+    labels: DATA.monthly.month,
+    datasets: [
+      { label:'Orders', data: DATA.monthly.orders, borderColor:'#C98A3C', tension:0.3, pointRadius:1.5, borderWidth:2 },
+      { label:'Active customers', data: DATA.monthly.active_customers, borderColor:'#7FA9C9', tension:0.3, pointRadius:1.5, borderWidth:2 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'top', labels:{ boxWidth:10, font:{size:11} } } },
+    scales:{
+      x:{ grid:{display:false}, ticks:{ maxRotation:60, minRotation:60, font:{size:10} } },
+      y:{ grid:{ color:gridColor } }
+    }
+  }
+});
+</script>
+</body>
+</html>

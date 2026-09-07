@@ -1,0 +1,23 @@
+product_id,product_name,category,unit_cost,unit_price
+P0001,Wireless Mouse,Electronics,8.33,46.48
+P0002,Bluetooth Speaker,Electronics,45.58,117.29
+P0003,USB-C Hub,Electronics,57.17,17.48
+P0004,Laptop Stand,Electronics,60.14,97.24
+P0005,Webcam,Electronics,53.32,63.09
+P0006,Power Bank,Electronics,31.23,46.81
+P0007,Office Chair,Furniture,33.2,110.75
+P0008,Standing Desk,Furniture,64.05,190.06
+P0009,Bookshelf,Furniture,149.44,186.88
+P0010,Desk Lamp,Furniture,31.86,336.91
+P0011,Filing Cabinet,Furniture,182.73,283.41
+P0012,Notebook Pack,Office Supplies,21.82,23.15
+P0013,Sticky Notes,Office Supplies,21.24,5.8
+P0014,Stapler,Office Supplies,9.09,11.34
+P0015,Pen Set,Office Supplies,5.64,8.21
+P0016,Whiteboard,Office Supplies,14.32,31.91
+P0017,Binder Clips,Office Supplies,13.42,8.44
+P0018,T-Shirt,Apparel,27.81,41.8
+P0019,Hoodie,Apparel,16.17,43.71
+P0020,Cap,Apparel,12.65,27.26
+P0021,Backpack,Apparel,30.73,24.53
+P0022,Water Bottle,Apparel,18.42,54.51
